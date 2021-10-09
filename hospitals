@@ -1,0 +1,256 @@
+from flask import Flask, make_response, request, jsonify
+from flask_mongoengine import MongoEngine
+
+app= Flask(__name__)
+
+database_name= "kinjal"
+#db uri is the mongo srv code
+app.config["MONGODB_HOST"] = DB_URI
+db = MongoEngine()
+db.init_app(app)
+
+class Bedlist(db.Document):
+  pincode= db.IntField()
+  n_of_hospitals= db.IntField()
+  levelAt1= db.IntField()
+  levelBt1= db.IntField()
+  levelCt1= db.IntField()
+  levelAt2= db.IntField()
+  levelBt2= db.IntField()
+  levelCt2= db.IntField()
+  levelAt3= db.IntField()
+  levelBt3= db.IntField()
+  levelCt3= db.IntField()
+  
+  
+
+  def to_json(self):
+    return {
+      "pincode": self.pincode,
+      "number of hospitals": self.n_of_hospitals,
+      "number of beds of patient critical level A in time slot t1" : self.levelAt1,
+      "number of beds of patient critical level B in time slot t1" : self.levelBt1,
+      "number of beds of patient critical level C in time slot t1" : self.levelCt1,
+      "number of beds of patient critical level A in time slot t2" : self.levelAt2,
+      "number of beds of patient critical level B in time slot t2" : self.levelBt2,
+      "number of beds of patient critical level C in time slot t2" : self.levelCt2,
+      "number of beds of patient critical level A in time slot t3" : self.levelAt3,
+      "number of beds of patient critical level B in time slot t3" : self.levelBt3,
+      "number of beds of patient critical level C in time slot t3" : self.levelCt3,
+     
+    }
+
+@app.route('/api/bedlist/fill', methods=['POST'])
+def fill():
+  pincoder= Bedlist(pincode= 789262, n_of_hospitals= 8, levelAt1= 567, levelBt1= 666, levelCt1= 777, levelAt2= 456, levelBt2= 345, levelCt2= 133, levelAt3=123, levelBt3= 144, levelCt3= 145)
+  pincodes= Bedlist(pincode= 789269, n_of_hospitals= 4, levelAt1= 527, levelBt1= 123, levelCt1= 98, levelAt2= 67, levelBt2= 423, levelCt2= 987, levelAt3=12, levelBt3= 89, levelCt3= 76)
+  pincoder.save()
+  pincodes.save()
+  return make_response("",201)
+
+@app.route('/api/bedlist/<pincode>', methods=['GET'])
+def bedlist(pincode):
+  bedobj= Bedlist.objects(pincode= pincode).first()
+  if bedobj:
+    return make_response(jsonify(bedobj.to_json()))
+
+@app.route('/api/bookbed/<pincode>/<A>/<t>', methods=['PUT'])
+def book(pincode,A,t):
+  findobj = Bedlist.objects(pincode= pincode).first()
+  if(A=='A' and t=='t1'):
+    if(findobj.levelAt1>0):
+      findobj.levelAt1=findobj.levelAt1-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+  if(A=='A' and t=='t2'):
+    if(findobj.levelAt2>0):
+      findobj.levelAt2=findobj.levelAt2-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+    
+  if(A=='A' and t=='t3'):
+    if(findobj.levelAt3>0):
+      findobj.levelAt3=findobj.levelAt3-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+  if(A=='B' and t=='t1'):
+    if(findobj.levelBt1>0):
+      findobj.levelBt1=findobj.levelBt1-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+  if(A=='B' and t=='t2'):
+    if(findobj.levelBt2>0):
+      findobj.levelBt2=findobj.levelBt2-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+  if(A=='B' and t=='t3'):
+    if(findobj.levelBt3>0):
+      findobj.levelBt3=findobj.levelBt3-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+  if(A=='C' and t=='t1'):
+    if(findobj.levelCt1>0):
+      findobj.levelCt1=findobj.levelCt1-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+  if(A=='C' and t=='t2'):
+    if(findobj.levelCt2>0):
+      findobj.levelCt2=findobj.levelCt2-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+  if(A=='C' and t=='t3'):
+    if(findobj.levelCt3>0):
+      findobj.levelCt3=findobj.levelCt3-1
+      return make_response("Bed booked successfully")
+    else:
+      return make_response("No bed remaining")
+      
+
+
+@app.route('/api/cancel/<pincode>/<A>/<t>', methods=['PUT'])
+def cancel(pincode,A,t):
+  findobj = Bedlist.objects(pincode= pincode).first()
+  if(A=='A' and t=='t1'):
+    findobj.levelAt1=findobj.levelAt1+1
+    return make_response("Cancelled successfully")
+  if(A=='A' and t=='t2'):
+    findobj.levelAt2=findobj.levelAt2+1
+    return make_response("Cancelled successfully")
+  if(A=='A' and t=='t3'):
+    findobj.levelAt3=findobj.levelAt3+1
+    return make_response("Cancelled successfully")
+  if(A=='B' and t=='t1'):
+    findobj.levelBt1=findobj.levelBt1+1
+    return make_response("Cancelled successfully")
+  if(A=='B' and t=='t2'):
+    findobj.levelBt2=findobj.levelBt2+1
+    return make_response("Cancelled successfully")
+  if(A=='B' and t=='t3'):
+    findobj.levelBt3=findobj.levelBt3+1
+    return make_response("Cancelled successfully")
+  if(A=='C' and t=='t1'):
+    findobj.levelCt1=findobj.levelCt1+1
+    return make_response("Cancelled successfully")
+  if(A=='C' and t=='t2'):
+    findobj.levelCt2=findobj.levelCt2+1
+    return make_response("Cancelled successfully")
+  if(A=='C' and t=='t3'):
+    findobj.levelCt3=findobj.levelCt3+1
+    return make_response("Cancelled successfully")
+      
+
+@app.route('/api/reschedule/<pincode>/<A>/<t>/<newA>/<newt>', methods=['PUT'])
+def reschedule(pincode, A,t,newA, newt):
+  findobj = Bedlist.objects(pincode= pincode).first()
+  if(A=='A' and t=='t1'):
+    findobj.levelAt1=findobj.levelAt1+1
+   
+  if(A=='A' and t=='t2'):
+    findobj.levelAt2=findobj.levelAt2+1
+    
+  if(A=='A' and t=='t3'):
+    findobj.levelAt3=findobj.levelAt3+1
+
+  if(A=='B' and t=='t1'):
+    findobj.levelBt1=findobj.levelBt1+1
+
+  if(A=='B' and t=='t2'):
+    findobj.levelBt2=findobj.levelBt2+1
+  
+  if(A=='B' and t=='t3'):
+    findobj.levelBt3=findobj.levelBt3+1
+
+  if(A=='C' and t=='t1'):
+    findobj.levelCt1=findobj.levelCt1+1
+
+  if(A=='C' and t=='t2'):
+    findobj.levelCt2=findobj.levelCt2+1
+
+    findobj.levelCt3=findobj.levelCt3+1
+  
+  if(newA=='A' and newt=='t1'):
+    findobj.levelAt1=findobj.levelAt1-1
+    if(findobj.levelAt1):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+   
+  if(newA=='A' and newt=='t2'):
+    findobj.levelAt2=findobj.levelAt2-1
+    if(findobj.levelAt2):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+    
+  if(newA=='A' and newt=='t3'):
+    findobj.levelAt3=findobj.levelAt3-1
+    if(findobj.levelAt3):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+
+  if(newA=='B' and newt=='t1'):
+    findobj.levelBt1=findobj.levelBt1-1
+    if(findobj.levelBt1):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+
+  if(newA=='B' and newt=='t2'):
+    findobj.levelBt2=findobj.levelBt2-1
+    if(findobj.levelBt2):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+  
+  if(newA=='B' and newt=='t3'):
+    findobj.levelBt3=findobj.levelBt3-1
+    if(findobj.levelBt3):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+
+  if(newA=='C' and newt=='t1'):
+    findobj.levelCt1=findobj.levelCt1-1
+    if(findobj.levelCt1):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+
+  if(newA=='C' and newt=='t2'):
+    findobj.levelCt2=findobj.levelCt2-1
+    if(findobj.levelCt2):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+
+  if(newA=='C' and newt=='t3'):
+    findobj.levelCt3=findobj.levelCt3-1
+    if(findobj.levelCt3):
+      return make_response("rescheduled successfully")
+    else:
+      return make_response("failed")
+    
+  
+
+
+
+if __name__ == '__main__':
+  app.run()
+
